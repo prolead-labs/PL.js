@@ -1,4 +1,4 @@
-define(['app', '../config/http.config'], function(app, httpConfig) {
+define(['app', '../config/api.config'], function(app, apiConfig) {
    'use strict';
 
 
@@ -14,14 +14,14 @@ define(['app', '../config/http.config'], function(app, httpConfig) {
             if( async == undefined ) async = true;
             
             $.ajax({
-                url: httpConfig.apiURI + endPoint,
+                url: apiConfig.apiURI + endPoint,
                 type: 'GET',
                 method: 'GET',
                 dataType: 'json',
                 data: params,
                 async: async, // se passar true no parametro sync, então não é assincrono 
                 headers:{
-                    "Authorization": "Basic " + btoa( httpConfig.authUser + ':' + httpConfig.authPass )
+                    "Authorization": "Basic " + btoa( apiConfig.authUser + ':' + apiConfig.authPass )
                 }
             })
             .always(function( response ) {
@@ -37,14 +37,14 @@ define(['app', '../config/http.config'], function(app, httpConfig) {
             if( async == undefined ) async = true;
 
             $.ajax({
-                url: httpConfig.apiURI + endPoint,
+                url: apiConfig.apiURI + endPoint,
                 type: 'POST',
                 contentType:"application/json",
                 dataType: 'json',
                 data: params,
                 async: async, // se passar true no parametro sync, então não é assincrono 
                 headers:{
-                "Authorization": "Basic " + btoa( httpConfig.authUser + ':' + httpConfig.authPass )
+                "Authorization": "Basic " + btoa( apiConfig.authUser + ':' + apiConfig.authPass )
                 }
             })
             .always(function(response) {
@@ -52,6 +52,7 @@ define(['app', '../config/http.config'], function(app, httpConfig) {
             });
         }
     }
+
 
     return http;
     
