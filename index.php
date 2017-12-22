@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Welcome to CodeIgniter</title>
+
+   
+</head>
+<body>
+
+    <div pl-app pl="view-container">
+        Acess <a href="#/welcome">#/welcome</a> to run PL.js welcome controller
+    </div>
+
+    <script src="pl.js"></script>
+    <script>
+
+        PLjs.set({
+            basePath: 'http://localhost/PL.js/PL.js',
+            appHash: '#/'
+        });
+        PLjs.run();
+
+    </script>
+
+</body>
+</html>

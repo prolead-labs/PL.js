@@ -4,7 +4,7 @@
 	window.PLjs = {
 
 	
-		basePath: null,
+		basePath: '',
 		appHash: '#!/',
 
 		// libraries autoload
@@ -77,68 +77,67 @@
 					// coloco o ajax loading
 					var plTags = document.getElementsByTagName('pl');
 
-
-					// ------------- VAI ADR RUIM AQUI -------------------
-					// document.querySelector não é suportado por muitos navegadores
-					//--
-					//--
-					//--
-					//--
-					//--
-					//--
-					//--
-					//--
-					//--
-					var appWrapper = document.querySelector('pl[val="app-wrapper"]');
+					// Coloco o loading dentro do container do app
+					var appWrapper = document.querySelector('[pl-app]');
 					appWrapper.innerHTML = PLjs.loadingTag;
-					//--
-					//--
-					//--
-					//--
-					//--
-					//--
-					//--
-					//--
-					//--
-					//--
-					//--
-					// ------------- VAI ADR RUIM AQUI -------------------
-
-					//$('pl[val="app-wrapper"]').html( PLjs.loadingTag );
 
 					// limpo o endereço da URL e deixo só o módulo que vai ser carregado
 					var moduleToLoad = hash.replace( PLjs.appHash , '');
 
-					// Verifico se o módulo já está carregado
-					if( require.defined( moduleToLoad ) ){
+					require(["../core/router"], function(router){
 
-						// se já está definifo, eu só vou reiniciar o módulo
+						router.init(function( currentModule ){
+							loadModule( currentModule );
+						});
 
-						// primeiro pego a lista dos módulos que já estão carregados
-						var loadedModules = require.s.contexts._.defined;
+					});
 
-						// e então reinicio o modulo
-						// GRAÇAS A ISSO, TODOS OS MÓDULOS DEVEM TER A FUNÇÃO init()
-						loadedModules[moduleToLoad].init();
+					
+					function loadModule( moduleToLoad ){
 
+						// Verifico se o módulo já está carregado
+						if( require.defined( moduleToLoad.controller ) ){
 
-					}
+							// se já está definifo, eu só vou reiniciar o módulo
 
-					else{
-						// se não estiver definido,
-						// faço o require desse cara :D
-						require([moduleToLoad]);
-					}
+							// primeiro pego a lista dos módulos que já estão carregados
+							var loadedModules = require.s.contexts._.defined;
 
-					// seto a var global que diz qual é o módulo atual
-					PLjs.currentModule = moduleToLoad;
+							// e então reinicio o modulo
+							// GRAÇAS A ISSO, TODOS OS MÓDULOS DEVEM TER A FUNÇÃO init()
+							loadedModules[ moduleToLoad.controller ][moduleToLoad.method].apply( null, moduleToLoad.params );
 
 
-					// troco a URL do cara
-					// window.history.pushState(moduleToLoad, 'PRO Lead APP ' + moduleToLoad , "/prolead-app/#!/" + moduleToLoad);
+						}
 
-					// coloco o título da página na aba do navegador
-					document.title = (moduleToLoad.pageTitle ? moduleToLoad.pageTitle : moduleToLoad) + ' - PRO Lead';
+						else{
+							// se não estiver definido,
+							// faço o require desse cara :D
+							require( [moduleToLoad.controller], function(_mod){
+								
+								if( typeof(_mod) === "undefined" ){
+									PLjs.load.e_404();
+									return;
+								}
+
+								_mod[moduleToLoad.method].apply(null, moduleToLoad.params);
+							});
+						}
+
+						// volta para o topo da página
+						window.scrollTo(0,0);
+
+						// seto a var global que diz qual é o módulo atual
+						PLjs.currentModule = moduleToLoad;
+
+
+						// troco a URL do cara
+						// window.history.pushState(moduleToLoad.controller, 'PRO Lead APP ' + moduleToLoad.controller , "/prolead-app/#!/" + moduleToLoad.controller);
+
+						// coloco o título da página na aba do navegador
+						document.title = (moduleToLoad.pageTitle ? moduleToLoad.pageTitle : moduleToLoad.controller) + ' - PRO Lead';
+
+					}//loadModule();
 
 				}
 			},
@@ -164,7 +163,8 @@
 			view: function(container, view, data, callback){
 
 	            // pego o container
-	            var viewContainer = $(document).find("pl[val="+container+"]");
+	            // var viewContainer = $(document).find("pl[val="+container+"]");
+	            var viewContainer = document.querySelector('[pl='+container+']');
 
 	            // chamo o mustache
 	            require(["mustache"], function(Mustache){
@@ -180,13 +180,44 @@
 	                    
 	                    // jogo o resultado no container
 	                    var output = Mustache.render(viewLoaded, data);
-	                    $(viewContainer).html(output);
+	                    viewContainer.innerHTML = output;
 
 	                    // se tem a função de callback, rodo ela
 	                    if( typeof(callback) === 'function' ) callback();
 					}
 					
 	            });
+	        },
+
+
+
+			/**
+			* load.config
+			*	Carrega um arquivo de configuração JSON
+			*	e retorna no callback o json já formatado
+			*/
+			config: function(file, callback){
+
+                // carrego a view
+                var xhr = new XMLHttpRequest();
+                // faço um XHR GET pra pegar o HTML da view
+				xhr.open('GET', PLjs.basePath + '/config/'+file+'.config.json');
+				xhr.send();
+				// Quando carregar o xhr carregar o HTML, lanço no Mustache
+				xhr.onreadystatechange = function() {
+					var json = xhr.responseText;
+
+                    // se tem a função de callback, rodo ela
+                    if( typeof(callback) === 'function' )
+                    	callback( JSON.parse(json) );
+				}
+	        },
+
+
+
+	        // Errors
+	        e_404: function( str ){
+	        	alert('Page not found\n\r' + (str || ""));
 	        }
 
 		},
@@ -198,13 +229,6 @@
 			if( !PLjs.basePath )
 			{
 				console.error('PLjs Error: PLjs.basePath is not defined. Please use PLjs.set() to configure your application before load that.');
-				return false;
-			}
-
-
-			if( ! window.$ )
-			{
-				console.error('PLjs Error: JQuery is required to run PLjs.');
 				return false;
 			}
 

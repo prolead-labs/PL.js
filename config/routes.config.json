@@ -1,0 +1,7 @@
+{
+	"tools/insights": {
+		"path": "tools",
+		"controller": "insights",
+		"method": "index"
+	}
+}
