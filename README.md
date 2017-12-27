@@ -7,15 +7,15 @@ O PL.js funciona com uma estrutura modular com carregamentos assíncronos de arq
 ## Primeiros passos
 Para iniciar o PL.js, você só precisa inserir o código abaixo no seu arquivo `index`
 ```html
-    <script src="pl.js"></script>
-    <script>
-        PLjs.set({
-            basePath: 'HTTP ADDRESS TO PL.js PATH',
-            appHash: '#!/',
-            loadLibs: ['api']
-        });
-        PLjs.run();
-    </script>
+<script src="pl.js"></script>
+<script>
+  PLjs.set({
+    basePath: 'HTTP ADDRESS TO PL.js PATH',
+    appHash: '#!/',
+    loadLibs: ['api']
+  });
+  PLjs.run();
+</script>
 ```
 
 Para entender cada linha acima:
@@ -77,10 +77,10 @@ Perceba que os valores para os parâmetros `product_id` e `status` são passados
 
 Basta adicionar um índice no arquivo JSON, seguindo a estrutura abaixo:
 ```json
-	"list-products": {
-		"controller": "products",
-		"method": "list"
-	}
+"list-products": {
+  "controller": "products",
+  "method": "list"
+}
 ```
 
 Quando acessar a URL `site.com/#!/list-product`, o PL.js carregará `controllers/products.js` e o método `list()`
@@ -88,10 +88,10 @@ Quando acessar a URL `site.com/#!/list-product`, o PL.js carregará `controllers
 Também é possível armazenar os `controllers` em subpastas. Basta utilizar `path` para informar qual pasta (ou caminho) o controller está localizado:
 
 ```json
-	"setting-products": {
-    	"path": "settings",
-		"controller": "products"
-	}
+"setting-products": {
+  "path": "settings",
+  "controller": "products"
+}
 ```
 
 No exemplo acima, o endereço URL `site.com/#!/setting-products`, carregará `controllers/settings/products.js` e - como o método não foi declarado - invocará o método `index()`
@@ -103,14 +103,14 @@ Existem várias formas de declarar classes (ou módulos) no PL.js.
 Nós gostamos de utilizar a seguinte sintaxe:
 ```javascript
 define(function(){
-	return {
-		index: function(){
-			// something here
-		},
-		list: function(param1, param2){
-			// list your products here
-		}
-	}
+  return {
+    index: function(){
+      // something here
+    },
+    list: function(param1, param2){
+      // list your products here
+    }
+  }
 }
 ```
 
@@ -120,4 +120,66 @@ Repare que `return` é um objeto com os índices `index` e `list`, que armazenam
 
 
 ## Views
->About views
+ Utilizamos o *Mustache.js* para compilar e entregar views. Todas as views estão localizadas na pasta `/views` dentro da raiz da instalação.
+ 
+ Para carregar uma view utilize a estrutura abaixo:
+ ```javascript
+ PLjs.load.view( [CONTAINER], [VIEW FILE], [VARIABLES] );
+ ```
+ 
+ `CONTAINER` é o local onde a view será carregada
+ 
+ `FILE` arquivo  *.html* com o template da view
+ 
+ `VARIABLES` Um objeto JSON com variáveis
+ 
+ ##### Exemplo:
+ Arquivo **controllers/welcome.js**
+ ```javascript
+ var varsData = {
+    title: "PL.js"
+}
+PLjs.load.view('view-container', 'welcome_message', varsData);
+ ```
+ 
+Arquivo **views/welcome_message.html**
+ ```html
+...
+<body>
+  <h1>Welcome to {{title}}!</h1>
+</body>
+...
+```
+ 
+> Obtenha mais informações sobre o uso de variáveis na [documentação do Mustache.js](https://github.com/janl/mustache.js/#variables)
+
+
+## Estrutura de Pastas e Arquivos
+A árvore de pastas do PL.js está organizada da seguinte maneira:
+```
+/ROOT/
+  config/
+  controllers/
+  core/
+  libraries/
+  vendor/
+  views/
+  index.html
+  pl.js
+```
+
+`config/` Armazena os arquivos `.json` de configuração da aplicação
+
+`controllers/` Controllers da aplicação. Para mais detalhes veja a sessão controllers
+
+`core/` Os arquivos internos para executar o PL.js
+
+`libraries/` Bibliotecas utilizadas na aplicação. Você também pode criar novas bibliotecas nesta pasta e carregá-las utilizando `PLjs.load.library('YOUR_LIB_NAME');`
+
+`vendor/` Você pode armazenar bibliotecas e plugins externos nesta pasta, como jQuery, por exemplo
+
+`views/` Aqui estão os arquivos `.html` com o template das suas views
+
+
+
+
